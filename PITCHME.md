@@ -51,8 +51,8 @@ BOXとは違うんですか？？
     - VMWare Player
     
 ---
-ホスト型仮想環境のイメージ
-<img src="assets/AddPitchmeYaml.png">
+ホスト型仮想環境のイメージ  
+<img src="assts/AddPitchmeYaml.png">
 - 代表的なソフトウェア
     - Oracle VM VirtulBox
     - VMWare Player
