@@ -140,43 +140,146 @@ Mac版(Docker for Mac)が存在する！！さらに、Windows版もある？
 
 brew-caskで導入  
 
-    brew cask install docker   # /Applications/Docker.app作成  
+    $ brew cask install docker   # /Applications/Docker.app作成  
 
 以上！  
-あとは、Docker.appをランチャーなどで起動すればOK
+あとは、Docker.appを起動すればOK。
 <img src="assts/docker.png">
 
 ---
 
+##### で、次は何をする？
+そもそも、Dockerコンテナってどうやって作成する？
+
+---
+
+Dockerコンテナ作成  
+1. 元となるimageをDockerHub(※1)よりダウンロードする
+1. 取得したimageから、コンテナを作成する諸設定を適用した新たなimageを作成する
+1. もしくは、そのコンテナを変更して、新たなimageを作成してからコンテナを作成する
+
+※1: Docker公式のリポジトリサービス
+
+---
+
+##### imageをダウンロードする。
+
+---
+
+- まずは、Docker HubのWebサイトにて、アカウント作成を行う。
+- 次に、CLIにて、Docker Hubにログインする。
+
+      $ docker login  
+      Username: 登録したユーザ名
+      Password: 登録したパスワード
+      Email: 登録したEmail
+      Login Succeeded
+
+---
+
+- imageを検索する。
+
+      $ docker search mysql  # イメージ名を指定
+      NAME 　DESCRIPTION 　STARS 　OFFICIAL 　AUTOMATED
+      mysql  ・・・　　　　　・・・　 [OK]       ・・・
+
+- imageをダウンロードする。
+
+      $ docker pull mysql:5.7  # イメージ名:タグ名　最新タグはlastest
+
+---
+
+##### imageからコンテナを作成/変更し、  
+##### 新しいimageを作成する
+
+---
+
+- imageよりコンテナを作成＆起動する
+
+      $ docker run -e MYSQL_ROOT_PASSWORD=root -d --name mysqld mysql  # コンテナ作成＆起動  -dはバックグラウンド起動
+
+
+- 変更後のコンテナを保存し、新しいイメージを作成する
+      $ docker exec -it mysqld /bin/bash  # 稼働中のコンテナにアクセス
+      # なんらかの設定を加えて、抜ける
+      ・・・・
+      $ docker commit mysqld mysql:new  #  mysqlの新しいタグを発行
+
+---
+
+##### とりあえず、コンテナ作成は出来たが・・・  
+##### コンテナ起動時に、DDL投入やデータ投入を行いたい！
+##### あとはスクリプトで行いたい（Infrastructure-as-code）
+
+---
+
+Dockerでは、image取得から諸設定後のimage作成を自動化する場合、Dockerfileに記載する。
+- ファイル名は 「Dockerfile」
+    - 別の名前も指定可能だが、その場合、DockerHubのイメージ自動生成機能が使えないらしい
+
+---
+とりあえず、こんな風に・・
+<img src="assts/dockerfile.png">
+
+
 
 
 ---
 
-###### 当初のイメージ
-DockerのホストOSってLinux上で動くからVMに専用のOS立てて、そこにインストールするか。。
+mysqlのコンテナの場合、環境変数に値を設定すると  
+データベースやユーザを自動作成してくれるらしい。
+- MYSQL_DATABASE : 作成するデータベース名
+- MYSQL_USER ： 作成するユーザ
+- MYSQL_PASSWARD：作成するユーザのパスワード
+
+※ 自分の環境では、ユーザ追加はされませんでした・・  
 
 ---
 
-#### やりたいこと
+ちなみに、mysqlなどのイメージのDockerfileは、githubにて公開されている。  
+[docker-library/mysql](https://github.com/docker-library/mysql/blob/0590e4efd2b31ec794383f084d419dea9bc752c4/5.7/Dockerfile)
 
-- ローカル環境でDockerコンテナを使う
-- その環境をクラウド上(GKE)で使えるようにする
-- アプリケーションは、マイクロサービスアーキテクチャ（風）としたい
-    - ということで、SpringCloud採用
 ---
 
-###
+また、複数のコンテナ（Dockerfile）を管理する場合は、docker-composeを使用する。  
+今後コンテナを増やす予定なので、docker-composeを使用する。
 
-これまでの仮想環境について考えてみる
+---
 
-
-
-
-
-### 3枚目のスライド
+docker-compose.ymlに記載。
+<img src="assts/docker-compose.png">
 
 
 ---
 
+あとは、docker-composeコマンドにて、image作成およびコンテナ起動する！ (ymlファイルのディレクトにて実行)
+
+    $ docker-compose build  # image作成
+    $ docker-compose up -d  # コンテナ起動
+
+---
+とりあえず起動した・・ようだ！
+<img src="assts/kitematic.png">
+
+
+---
+Repositoryクラスのテストも無事成功!!
+<img src="assts/junit.png">
+
+---
+
+ここで終了・・・・・
+
+---
+
+#### 今後やりたいこと
+
+- マイクロサービスアーキテクチャ（風）のアプリに改造する
+    - とりあえずSpringCloudベース
+- ローカルにKubernetes(minikube)を導入し、アプリをデプロイしてみる
+- それをクラウド上(GKE)にもデプロイしてみる
+- PCFにもデプロイしてみる（できるか？）
+
+---
 
 ### おわり
