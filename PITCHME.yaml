@@ -28,3 +28,6 @@ transition : fade
 
 #Auto Slide Setting(1000で1秒)
 #autoslide : 5000
+
+#チャート / グラフ機能の設定
+charts : true
