@@ -155,10 +155,10 @@ brew-caskで導入
 
 Dockerコンテナ作成  
 1. 元となるimageをDockerHub(※1)よりダウンロードする
-1. 取得したimageから、コンテナを作成する諸設定を適用した新たなimageを作成する
-1. もしくは、そのコンテナを変更して、新たなimageを作成してからコンテナを作成する
+1. 取得したimageから、コンテナを作成する
+1. もしくは、そのコンテナを変更して、新たなimageを作成してコンテナを作成する
 
-※1: Docker公式のリポジトリサービス
+※1: Docker公式のリポジトリサービス  
 
 ---
 
@@ -166,7 +166,9 @@ Dockerコンテナ作成
 
 ---
 
-- まずは、Docker HubのWebサイトにて、アカウント作成を行う。
+- まずは、Docker HubのWebサイトにて、アカウント作成を行う。  
+[https://hub.docker.com](https://hub.docker.com)
+
 - 次に、CLIにて、Docker Hubにログインする。
 
       $ docker login  
@@ -265,6 +267,8 @@ docker-compose.ymlに記載。
 ---
 Repositoryクラスのテストも無事成功!!
 <img src="assts/junit.png">
+
+
 
 ---
 
