@@ -52,7 +52,7 @@ BOXとは違うんですか？？
     
 ---
 ホスト型仮想環境のイメージ  
-<img src="assts/AddPitchmeYaml.png">
+<img src="assts/host.png">
 - 代表的なソフトウェア
     - Oracle VM VirtulBox
     - VMWare Player
