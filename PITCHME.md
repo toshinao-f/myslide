@@ -40,12 +40,12 @@ Docker
 
 ---
 
-#### Dockerの概要 - 1
+### Dockerの概要 - 1
 ![docker_view](./assts/docker_view.png)
 
 ---
 
-#### Dockerの概要 - 2
+### Dockerの概要 - 2
 - Dockerイメージを公式リポジトリから取得
     - MySQLやJenkinsなど、有名なOSS製品はほとんど存在する
 - Dockerイメージを実行(RUN)することで、MySQLなどのサービスを内包した環境を利用できる（コンテナとして作成される）
@@ -53,15 +53,14 @@ Docker
 
 ---
 
-#### Dockerの概要 - 3
+### Dockerの概要 - 3
 - コンテナ起動しなくても、Dockerfileからビルドすることで、オリジナルのDockerイメージを作成することが可能
     - Dockerfileの配布だけで、他マシンで同環境の構築が可能
 - docker-composeを利用することで、複数のDockerfileの起動や関連付けが可能となる
 
 ---
 
-#### コンテナのメリット
-コンテナは、アプリケーションコードとその依存性のみを一つのユニットしてまとめる
+### コンテナのメリット
 - 軽量
     - 仮想マシンと比べて軽量でシンプル
     - 起動が早い
@@ -80,7 +79,7 @@ Docker
 
 ---
 
-#### GKEとは
+### GKEとは
 - Google Kubernetes Engine の略
     - Google Container Engine から改名された模様
 - クラウドサービス
@@ -89,7 +88,7 @@ Docker
 
 ---
 
-#### コンテナの課題
+### コンテナの課題
 Dockerはコンテナ単位の管理しかできない
 - 複数のノードに対するデプロイは？
 - ノード障害、コンテナ障害が発生した場合はどうする？
@@ -97,18 +96,22 @@ Dockerはコンテナ単位の管理しかできない
 
 ---
 
-#### ということで、GKE
+### ということで、GKE
 - Kubernetesはコンテナをクラスタとして管理する仕組み
 - DockerとKubernetesをマネージメントしやすくサービス化したのがGKE
 
 ---
 
-#### GKEのサービス的な面
+### GKEのサービス的な面
 - Kubernetes Engine
     - アプリケーションやサービスを簡単にデプロイ、更新、管理できる
     - 自動スケーリング など
 - Google Site Reliability Engineers（SRE）
     - クラスタとそのコンピューティング、ネットワーク、およびストレージのリソースを継続的にモニタリング
+
+---
+
+### GKEのサービス的な面
 - 0〜5ノードまで無料
     - 6ノード以上は、1ノードあたり$0.15
 - 詳しくは[公式サイト](https://cloud.google.com/kubernetes-engine/?hl=ja)を参照
@@ -129,7 +132,7 @@ Kubernetes
 
 ---
 
-#### Kubernetes(略して、k8s)とは
+### Kubernetes(略して、k8s)とは
 - コンテナオーケストレーション
     - 自動デプロイ、スケーリング、アプリ・ コンテナの運用自動化のために設計されたオープンソースのプラットフォーム
     - 2014年にオープンソース化
@@ -138,7 +141,7 @@ Kubernetes
 
 ---
 
-#### k8sでやれること
+### k8sでやれること
 - 複数のコンテナをデプロイ
 - コンテナ間のネットワーク管理(名前空間含む）
 - コンテナの死活管理
@@ -148,12 +151,14 @@ Kubernetes
 - コンテナのリソースアロケーション
     - コンテナ毎にCPUやメモリ割り当て
 
-#### k8s の構成要素
+---
+
+### k8s の構成要素
 ![k8sアーキテクチャ](./assts/k8s_01.png)
 
 ---
 
-#### k8s の構成要素
+### k8s の構成要素
 - Master Component
     - クラスタの制御を受けもつ
     - クラスタ内のどのノードでも実行できる
@@ -162,17 +167,21 @@ Kubernetes
 
 ---
 
-#### Master Component イメージ
+### Master Component イメージ
 ![k8sアーキテクチャ](./assts/k8s_02.png)
 
 ---
 
-#### Master Component イメージ
+### Master Component イメージ
 - API Server
     - 制御部のフロントエンド
     - API ServerをRestAPIで叩くコマンドツールとして kubectlがある
 - Shceduler
     - Podのノードへの割り当てを行う
+
+---
+
+### Master Component イメージ
 - Controller
     - クラスタの状態を常に監視するバックグラウンドプロセス
     - 定義された状態が異なると、それを修正するコンポーネント
@@ -182,12 +191,12 @@ Kubernetes
 
 ---
 
-#### Node Component イメージ
+### Node Component イメージ
 ![k8sアーキテクチャ](./assts/k8s_03.png)
 
 ---
 
-#### Node Component イメージ
+### Node Component イメージ
 - Pod
     - 1〜nのコンテナをデプロイする単位
     - Pod内のコンテナは同じ物理マシン、IPアドレス、などのリソースを共有する
@@ -200,7 +209,7 @@ Kubernetes
 
 ---
 
-#### Node Component イメージ (その他)
+### Node Component イメージ (その他)
 - Docker Engine
     - コンテナ実行環境
 - supervisord
@@ -218,7 +227,7 @@ Kubernetes
 
 ---
 
-#### やること
+### やること
 Cloud SQL Proxy経由でCloud SQLに接続するアプリをデプロイする
 - コンテナ クラスタの作成
 - DockerImageを作成し、ContainerRegistryに登録
@@ -228,7 +237,7 @@ Cloud SQL Proxy経由でCloud SQLに接続するアプリをデプロイする
 
 ---
 
-#### GKE補足
+### GKE補足
 - Deployment
     - ローリングアップデートやロールバックといったデプロイ管理の仕組みを提供する
     - ReplicaSetを生成、管理
@@ -241,24 +250,24 @@ Cloud SQL Proxy経由でCloud SQLに接続するアプリをデプロイする
 
 ---
 
-#### 構成
+### 構成
 ![k8sアーキテクチャ](./assts/gke_01.png)
 
 ---
 
-#### 構成 (ローリングアップデート)
+### 構成 (ローリングアップデート)
 ![k8sアーキテクチャ](./assts/gke_02.png)
 
 ---
 
-#### デプロイについて
+### デプロイについて
 - デプロイメントを変更した場合、新しいReplicaSetが作成される
 - 変更前デプロイ情報は、変更後も一定期間残る。
     - 履歴からロールバックが可能
 
 ---
 
-#### 所感
+### 所感
 - 簡単にクラスタ環境構築が可能(お試し程度なら無償でできる)
 - 開発側からするとDockerは非常に便利
     - 検証環境がすぐに手に入る
@@ -267,13 +276,13 @@ Cloud SQL Proxy経由でCloud SQLに接続するアプリをデプロイする
 
 ---
 
-#### 次回
+### 次回
 - DevOpsや完全自動化の観点から、メリットデメリットを整理する?
 - PCFや類似製品などと比較する?
 
 ---
 
-#### 参考資料など
+### 参考資料など
 - [Google Kubernetes Engine ドキュメント](https://cloud.google.com/kubernetes-engine/docs/?hl=ja)
 - [鯨物語～Dockerコンテナとオーケストレーションの理解](https://www.slideshare.net/zembutsu/tale-of-docker)
 - [Docker（コンテナ型仮想化）と Kubernetes についての簡単な紹介](https://ubiteku.oinker.me/2017/02/21/docker-and-kubernetes-intro/#what-is-kubernetes)
