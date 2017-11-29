@@ -1,334 +1,286 @@
-## Docker初心者がとりあえずDockerを使ってみたら・・・
+## FITAAT : Docker vs PCF チーム
+第２回 今回もDokcerかい..
+　  
 
-
-
-
-
----
-
-### はじめにいっておくことがあります。
-
----
-
-### すみません!!
-### ほとんど出来ておりません！！！
+　  
+　  
+　  
+　　　　FS1 藤田
 
 ---
 
-### ということで、
-### 今回は意気込みだけ！！次回に期待！！
-
----
-### 注意事項
-
-あくまでDocker Lv.1の、よくわからない棒だけ持たされてとりあえず行って来いした人が書いたものです。
-そこら辺は、暖かく見守ってください。
+### 今回は、Dockerコンテナをクラウド環境(GKE)にデプロイするまでを試したので、その件について説明
 
 ---
 
-### それだけ！！
-### じゃ、いきます！
-
----
-### 1章 Docker とはなんぞや？
----
-
-すばり、  
-コンテナ仮想環境化でアプリケーションを管理/実行するためのオープンソースプラットフォーム
-
----
-ん？コンテナ？　なんですか。。。それ。  
-BOXと何が違うんですか？？
-
----
-##### ということで、仮想環境について整理。
+### 発表内容
+- Dockerのおさらい ！
+- GKE？？
+- Kubernetesって何 ？？？
+- デモ：GKEにてローリングアップデートを試す ！！！！
+- PCF..... は、次回
 
 ---
 
-###### まずは、ホスト型仮想環境。
-
----  
-ホストOSに仮想ソフトウェアをインストール。  
-仮想ソフトウェア上でゲストOSを動作させる。　
-
-<img src="assts/host.png">
----
-
-開発者としては、少なくともローカルの検証環境など使用しているはず。  
-が、遅い。重い。 低スペック端末だと石化。  
-OSの中でほぼそのままのOSを立ち上げている以上、オーバーヘッドが大きい。。  
-
----
-代表的なソフトウェア
-- Oracle VM VirtualBox
-- VMWare Player
-- Virtual PC
+### 発表者について
+- 最近AWSを使い始めるようになったLv1のクラウド冒険者
+- アプリ屋でJava子だが、インフラおぼえたい　
+- 最新覚えたDockerを我が物顔で使えて...いる
+- BlockChain勉強中、意味不明すぎて困惑している
 
 ---
 
-###### 続いて、ハイパーバイザ型仮想環境。
+## Dockerのおさらい ！
 
 ---
 
-ハードウェア上に仮想環境専門のソフトウェア（ハイパーバイザ）を配置。
-このハイパーバイザにより仮想環境とハードウェアを制御するため、ほぼマシン全体が仮想環境というイメージ。
-　　
-<img src="assts/hyper.png">
+Docker
 
+![docker](./assts/vertical_large.png)
 
 ---
 
-ハイパーバイザ型は、だいたいファームウェアで提供されている。  
-自分のわかる範囲では、オンプレで開発環境や検証環境を構築する場合など利用している。    
-また、起動時のオーバーヘッドが大きいと聞く。
-実際に構築したことがないので、詳しくはわかりませんが。。  
+#### Dockerの概要 - 1
+![docker_view](./assts/docker_view.png)
 
 ---
 
-- 代表的なソフトウェア
-    - Hyper-v
-    - XenSever
-        - Amazon EC2 もXenSeverベース
----
-
-###### 残りは、コンテナ型仮想環境
-
+#### Dockerの概要 - 2
+- Dockerイメージを公式リポジトリから取得
+    - MySQLやJenkinsなど、有名なOSS製品はほとんど存在する
+- Dockerイメージを実行(RUN)することで、MySQLなどのサービスを内包した環境を利用できる（コンテナとして作成される）
+- コンテナで行った変更を新しいのDockerイメージとして保管することができる
 
 ---
 
-ホストOS上に、論理的な区画（コンテナ）を用意し、アプリケーションの動作に必要なライブラリやアプリケーションを格納してホストOSから分離。ホストOSのリソースを他コンテナと共有することで、あたかも個別のサーバーのように使うことができる。
-
-<img src="assts/container.png">
-
----
-Dockerは、まさにこれです。  
-
-ようするに、軽量な仮想環境ってことですか! （汗）
+#### Dockerの概要 - 3
+- コンテナ起動しなくても、Dockerfileからビルドすることで、オリジナルのDockerイメージを作成することが可能
+    - Dockerfileの配布だけで、他マシンで同環境の構築が可能
+- docker-composeを利用することで、複数のDockerfileの起動や関連付けが可能となる
 
 ---
 
-なるほど！　ということで・・
+#### コンテナのメリット
+コンテナは、アプリケーションコードとその依存性のみを一つのユニットしてまとめる
+- 軽量
+    - 仮想マシンと比べて軽量でシンプル
+    - 起動が早い
+- ポータブル
+    - 様々な実行環境に対し、デプロイメントが容易
+- 効率性
+    - リソース使用量が少ない
 
 ---
 
-### 第2章 よくわからないから、Dockerについて調べてみる
+### 以上！！ 次へ>>
 
 ---
 
-まずは、dockerイメージについて。
-
----
-- コンテナを実行する時に必要なファイルシステム
-- 階層構造となっている
-    - 変更があった場合は、差分のみを記録する
-    - 各レイヤごとにIDが振られており、共通するレイヤはイメージ間で共有可能
-<img src="/assts/docker-img.png">
-
+## GKEとは ？？
 
 ---
 
-次に、dockerの簡単な仕組みについて。
+#### GKEとは
+- Google Kubernetes Engine の略
+    - Google Container Engine から改名された模様
+- クラウドサービス
+- Docker コンテナを実行するための強力なクラスタ管理およびオーケストレーション 機能を提供
+- Googleが開発し現在オープンソース化されている Kubernetes をベースとしている
 
 ---
 
-- dockerイメージは Docker Hub というオープンリポジトリより取得する
-- 取得したdockerイメージからコンテナを作成する
+#### コンテナの課題
+Dockerはコンテナ単位の管理しかできない
+- 複数のノードに対するデプロイは？
+- ノード障害、コンテナ障害が発生した場合はどうする？
+- アプリケーションのアップグレードは？
 
 ---
 
-<img src="/assts/image1.png">
+#### ということで、GKE
+- Kubernetesはコンテナをクラスタとして管理する仕組み
+- DockerとKubernetesをマネージメントしやすくサービス化したのがGKE
 
 ---
 
-- 変更したコンテナを保存して新しいイメージを作成することが可能
-- また、Dokerfile（スクリプト）から自動的に作成することも可能
+#### GKEのサービス的な面
+- Kubernetes Engine
+    - アプリケーションやサービスを簡単にデプロイ、更新、管理できる
+    - 自動スケーリング など
+- Google Site Reliability Engineers（SRE）
+    - クラスタとそのコンピューティング、ネットワーク、およびストレージのリソースを継続的にモニタリング
+- 0〜5ノードまで無料
+    - 6ノード以上は、1ノードあたり$0.15
+- 詳しくは[公式サイト](https://cloud.google.com/kubernetes-engine/?hl=ja)を参照
 
 ---
 
-<img src="/assts/image2.png">
+### 一旦、以上。次へ>>>  
 
 ---
 
-- 変更したコンテナはDocker Hubリポジトリにアップすることが可能
+## Kubernetesって何 ？？？
 
 ---
 
-<img src="/assts/image3.png">
+Kubernetes
+
+![k8s](./assts/kubernetes-logo1.png)
 
 ---
 
-### 第3章 まだよくわからないから、Dockerを導入してみる
+#### Kubernetes(略して、k8s)とは
+- コンテナオーケストレーション
+    - 自動デプロイ、スケーリング、アプリ・ コンテナの運用自動化のために設計されたオープンソースのプラットフォーム
+    - 2014年にオープンソース化
+- Docker 実行環境をクラスタ化する
+    - 複数台のホストから構成される実行環境を、あたかも一台の実行環境のように扱う
 
 ---
 
-##### やりたいこと
-- ローカル環境(Mac)にDockerをインストール！
-- DB ServerをDokcerコンテナに置き換える！！
+#### k8sでやれること
+- 複数のコンテナをデプロイ
+- コンテナ間のネットワーク管理(名前空間含む）
+- コンテナの死活管理
+    - コンテナが死んだら自動で起動
+- コンテナの負荷分散
+    - 同一機能の複数コンテナへのアクセスをバランシング
+- コンテナのリソースアロケーション
+    - コンテナ毎にCPUやメモリ割り当て
+
+#### k8s の構成要素
+![k8sアーキテクチャ](./assts/k8s_01.png)
 
 ---
 
-##### まずはインストール。
+#### k8s の構成要素
+- Master Component
+    - クラスタの制御を受けもつ
+    - クラスタ内のどのノードでも実行できる
+- Node Component
+    - 実行中のPodを維持し、k8sランタイム環境を提供する
 
 ---
 
-###### 当初のイメージ
-DockerのホストOSってLinux上で動くからVMに専用のOS立てて、そこにインストールするか。。
+#### Master Component イメージ
+![k8sアーキテクチャ](./assts/k8s_02.png)
 
 ---
 
-###### 開始０.１秒で気づいたこと
-Mac版(Docker for Mac)が存在する！！さらに、Windows版もある？  
-- xhybe(ネイティブHypervisor.Frameworkを軽量化したハイパーバイザ)を利用するため、Virtual Box不要
-- Macであれば、もちろんhomebrewで導入可能
+#### Master Component イメージ
+- API Server
+    - 制御部のフロントエンド
+    - API ServerをRestAPIで叩くコマンドツールとして kubectlがある
+- Shceduler
+    - Podのノードへの割り当てを行う
+- Controller
+    - クラスタの状態を常に監視するバックグラウンドプロセス
+    - 定義された状態が異なると、それを修正するコンポーネント
+- etcd
+    - KVS
+    - クラスタの全データを格納するデータストア
 
 ---
 
-brew-caskで導入  
-
-    $ brew cask install docker   # /Applications/Docker.app作成  
-
-以上！  
-あとは、Docker.appを起動すればOK。
-<img src="assts/docker.png">
+#### Node Component イメージ
+![k8sアーキテクチャ](./assts/k8s_03.png)
 
 ---
 
-##### で、次は何をする？
-そもそも、Dockerコンテナってどうやって作成する？
+#### Node Component イメージ
+- Pod
+    - 1〜nのコンテナをデプロイする単位
+    - Pod内のコンテナは同じ物理マシン、IPアドレス、などのリソースを共有する
+- kubulet
+    - プライマリのエージェントで、ノードに割り当てられたPodを監視
+- kube-proxy
+    - 各Nodeで実行するネットワークプロキシ
+    - ネーミングルールに基づき接続や転送を実施
+    - iptablesを操作
 
 ---
 
-Dockerコンテナ作成  
-1. 元となるimageをDockerHub(※1)よりダウンロードする
-1. 取得したimageから、コンテナを作成する
-1. もしくは、そのコンテナを変更して、新たなimageを作成してコンテナを作成する
-
-※1: Docker公式のリポジトリサービス  
-
----
-
-##### imageをダウンロードする。
+#### Node Component イメージ (その他)
+- Docker Engine
+    - コンテナ実行環境
+- supervisord
+    - kubelet と Docker Engineのプロセス監視と制御
+- fluentd
+    - ログ取得のためのプロセス
 
 ---
 
-- まずは、Docker HubのWebサイトにて、アカウント作成を行う。  
-[https://hub.docker.com](https://hub.docker.com)
-
-- 次に、CLIにて、Docker Hubにログインする。
-
-      $ docker login  
-      Username: 登録したユーザ名
-      Password: 登録したパスワード
-      Email: 登録したEmail
-      Login Succeeded
+### 以上 ! 次へはデモ >>>
 
 ---
 
-- imageを検索する。
-
-      $ docker search mysql  # イメージ名を指定
-      NAME 　DESCRIPTION 　STARS 　OFFICIAL 　AUTOMATED
-      mysql  ・・・　　　　　・・・　 [OK]       ・・・
-
-- imageをダウンロードする。
-
-      $ docker pull mysql:5.7  # イメージ名:タグ名　最新タグはlastest
+## デモ：GKEにてローリングアップデートを試す ！！！！
 
 ---
 
-##### imageからコンテナを作成/変更し、  
-##### 新しいimageを作成する
+#### やること
+Cloud SQL Proxy経由でCloud SQLに接続するアプリをデプロイする
+- コンテナ クラスタの作成
+- DockerImageを作成し、ContainerRegistryに登録
+- アカウント、接続情報を設定
+- Kubernetes Engineにデプロイする
+- 変更したアプリをデプロイする
 
 ---
 
-- imageよりコンテナを作成＆起動する
-
-      $ docker run -e MYSQL_ROOT_PASSWORD=root -d --name mysqld mysql  # コンテナ作成＆起動  -dはバックグラウンド起動
-
-
-- 変更後のコンテナを保存し、新しいイメージを作成する
-      $ docker exec -it mysqld /bin/bash  # 稼働中のコンテナにアクセス
-      # なんらかの設定を加えて、抜ける
-      ・・・・
-      $ docker commit mysqld mysql:new  #  mysqlの新しいタグを発行
-
----
-
-##### とりあえず、コンテナ作成は出来たが・・・  
-##### コンテナ起動時に、DDL投入やデータ投入を行いたい！
-##### あとはスクリプトで行いたい（Infrastructure-as-code）
+#### GKE補足
+- Deployment
+    - ローリングアップデートやロールバックといったデプロイ管理の仕組みを提供する
+    - ReplicaSetを生成、管理
+    - 定義ファイルは、yml もしくは json 形式で記述
+- Service
+    - アプリケーションのエンドポイント
+    - kube-proxy経由でiptablesを操作
+- ReplicaSet
+    - Podを生成・管理する
 
 ---
 
-Dockerでは、image取得から諸設定後のimage作成を自動化する場合、Dockerfileに記載する。
-- ファイル名は 「Dockerfile」
-    - 別の名前も指定可能だが、その場合、DockerHubのイメージ自動生成機能が使えないらしい
-
----
-とりあえず、こんな風に・・
-<img src="assts/dockerfile.png">
-
-
-
+#### 構成
+![k8sアーキテクチャ](./assts/gke_01.png)
 
 ---
 
-mysqlのコンテナの場合、環境変数に値を設定すると  
-データベースやユーザを自動作成してくれるらしい。
-- MYSQL_DATABASE : 作成するデータベース名
-- MYSQL_USER ： 作成するユーザ
-- MYSQL_PASSWARD：作成するユーザのパスワード
-
-※ 自分の環境では、ユーザ追加はされませんでした・・  
+#### 構成 (ローリングアップデート)
+![k8sアーキテクチャ](./assts/gke_02.png)
 
 ---
 
-ちなみに、mysqlなどのイメージのDockerfileは、githubにて公開されている。  
-[docker-library/mysql](https://github.com/docker-library/mysql/blob/0590e4efd2b31ec794383f084d419dea9bc752c4/5.7/Dockerfile)
+#### デプロイについて
+- デプロイメントを変更した場合、新しいReplicaSetが作成される
+- 変更前デプロイ情報は、変更後も一定期間残る。
+    - 履歴からロールバックが可能
 
 ---
 
-また、複数のコンテナ（Dockerfile）を管理する場合は、docker-composeを使用する。  
-今後コンテナを増やす予定なので、docker-composeを使用する。
+#### 所感
+- 簡単にクラスタ環境構築が可能(お試し程度なら無償でできる)
+- 開発側からするとDockerは非常に便利
+    - 検証環境がすぐに手に入る
+- あまりにも簡単にできたので、細かい仕様が理解できていない
+- 運用上の問題が気になるが、整理できてない
 
 ---
 
-docker-compose.ymlに記載。
-<img src="assts/docker-compose.png">
-
-
----
-
-あとは、docker-composeコマンドにて、image作成およびコンテナ起動する！ (ymlファイルのディレクトにて実行)
-
-    $ docker-compose build  # image作成
-    $ docker-compose up -d  # コンテナ起動
-
----
-とりあえず起動した・・ようだ！
-<img src="assts/kitematic.png">
-
-
----
-Repositoryクラスのテストも無事成功!!
-<img src="assts/junit.png">
-
-
+#### 次回
+- DevOpsや完全自動化の観点から、メリットデメリットを整理する?
+- PCFや類似製品などと比較する?
 
 ---
 
-ここで終了・・・・・
+#### 参考資料など
+- [Google Kubernetes Engine ドキュメント](https://cloud.google.com/kubernetes-engine/docs/?hl=ja)
+- [鯨物語～Dockerコンテナとオーケストレーションの理解](https://www.slideshare.net/zembutsu/tale-of-docker)
+- [Docker（コンテナ型仮想化）と Kubernetes についての簡単な紹介](https://ubiteku.oinker.me/2017/02/21/docker-and-kubernetes-intro/#what-is-kubernetes)
+- [Kubernetes: 構成コンポーネント一覧](https://qiita.com/tkusumi/items/c2a92cd52bfdb9edd613)
 
 ---
 
-#### 今後やりたいこと
-
-- マイクロサービスアーキテクチャ（風）のアプリに改造する
-    - とりあえずSpringCloudベース
-- ローカルにKubernetes(minikube)を導入し、アプリをデプロイしてみる
-- それをクラウド上(GKE)にもデプロイしてみる
-- PCFにもデプロイしてみる（できるか？）
+## おわり
 
 ---
-
-### おわり
