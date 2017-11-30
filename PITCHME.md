@@ -262,7 +262,7 @@ Cloud SQL Proxy経由でCloud SQLに接続するアプリをデプロイする
 ---
 
 ### まとめ・・
-![Kubernetes architecture](./assts/architecture.png)
+<img src="/assts/architecture.png" width=80%>
 
 ---
 
