@@ -102,16 +102,10 @@ Dockerはコンテナ単位の管理しかできない
 
 ---
 
-### GKEのサービス的な面
+### GKEの概要
 - Kubernetes Engine
     - アプリケーションやサービスを簡単にデプロイ、更新、管理できる
     - 自動スケーリング など
-- Google Site Reliability Engineers（SRE）
-    - クラスタとそのコンピューティング、ネットワーク、およびストレージのリソースを継続的にモニタリング
-
----
-
-### GKEのサービス的な面
 - 0〜5ノードまで無料
     - 6ノード以上は、1ノードあたり$0.15
 - 詳しくは[公式サイト](https://cloud.google.com/kubernetes-engine/?hl=ja)を参照
@@ -184,7 +178,7 @@ Kubernetes
 ### Master Component イメージ
 - Controller
     - クラスタの状態を常に監視するバックグラウンドプロセス
-    - 定義された状態が異なると、それを修正するコンポーネント
+    - ReplicaSet、Deployment など
 - etcd
     - KVS
     - クラスタの全データを格納するデータストア
@@ -237,7 +231,7 @@ Cloud SQL Proxy経由でCloud SQLに接続するアプリをデプロイする
 
 ---
 
-### GKE補足
+### デプロイメントの補足
 - Deployment
     - ローリングアップデートやロールバックといったデプロイ管理の仕組みを提供する
     - ReplicaSetを生成、管理
@@ -264,6 +258,11 @@ Cloud SQL Proxy経由でCloud SQLに接続するアプリをデプロイする
 - デプロイメントを変更した場合、新しいReplicaSetが作成される
 - 変更前デプロイ情報は、変更後も一定期間残る。
     - 履歴からロールバックが可能
+
+---
+
+### まとめ・・
+![Kubernetes architecture](./assts/architecture.png)
 
 ---
 
