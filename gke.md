@@ -58,29 +58,8 @@ cd ~/github
 git clone git@github.com:toshinao-f/docker-workshop.git
 ```
 
-#### Dockerイメージをアップする
-- 事前にContainer Registry APIを有効にしておく
-- Jarを作成する
-```
-./mvnw clean package spring-boot:repackage -Dmaven.test.skip=true
-```
-- Dockerイメージを作成し、Container Registryに登録する
-    - レジストリ形式は以下の通りのため、この形式でTagを設定する必要がある
-    ```
-    [HOSTNAME]/[YOUR-PROJECT-ID]/[IMAGE]
-    ```
-        - [HOSTNAME]= gcr.io
-        - [YOUR-PROJECT-ID]=プロジェクトID
-        - [IMAGE]=イメージ名
 
-    - コマンドは以下の通り
-    ```
-    export PROJECT_ID=pivotal-base-187011
-    docker build --tag=gcr.io/$PROJECT_ID/example:1.0.0 ./
-    gcloud docker -- push gcr.io/$PROJECT_ID/example:1.0.0
-    ```
-
-#### GCP設定
+#### コンテナクラスタ作成
 - Google Container Engine API を有効にしておく
 - Google Cloud SQL API を有効にしておく
 - kubectlをインストールし、クラスタを作成
@@ -88,6 +67,8 @@ git clone git@github.com:toshinao-f/docker-workshop.git
 gcloud components install kubectl
 gcloud container clusters create deploydemo-cluster --zone=asia-northeast1-a
 ```
+
+#### CloudSQL接続設定
 
 - IAM管理コンソールにて、新規サービスアカウントを作成する
     - 役割は、CloudSQLクライアント、CloudSQL編集者
@@ -108,20 +89,37 @@ kubectl create secret generic cloudsql-instance-credentials --from-file=/secrets
 kubectl create secret generic cloudsql-db-credentials --from-literal=username=mysql --from-literal=password=mysql
 ```
 
-#### デプロイ
+#### Dockerイメージを作成し、ContainerRegistryに登録
 - Jarファイルを作成する
 ```
 cd ~/github/deploydemo/
 ./mvnw package spring-boot:repackage -Dmaven.test.skip=true
+
+```
+
+- ビルドする
+```
 # jarファイルをDockerfile用のフォルダにコピー
 cp ~/github/deploydemo/target/deploydemo-0.0.1-SNAPSHOT.jar ~/github/docker-workshop/PG/Dockerfiles/gke/app
+# ビルド
+export PROJECT_ID=[プロジェクトID]
+docker build --tag=gcr.io/$PROJECT_ID/deploydemo:1.0.0 ./ --build-arg SPRING_JAR_FILE=deploydemo-0.0.1-SNAPSHOT.jar
+
+```
+- なおレジストリ形式は以下の通りのため、この形式でTagを設定する必要がある
+```
+[HOSTNAME]/[YOUR-PROJECT-ID]/[IMAGE]
+> [HOSTNAME]= gcr.io
+> [YOUR-PROJECT-ID]=プロジェクトID
+> [IMAGE]=イメージ名
 ```
 
 - Google Container Registryに登録する
 ```
-gcloud docker -- push gcr.io/pivotal-base-187011/deploydemo:1.0.0
+gcloud docker -- push gcr.io/$PROJECT_ID/deploydemo:1.0.0
 ```
 
+#### デプロイ
 - Podを作成する
 ```
 kubectl create -f deployment.yml --record
@@ -136,6 +134,17 @@ kubectl create -f service.yml
 kubectl get services
 ```
 
+- EXTERNAL-IPのIPアドレスにアクセスして、アプリが表示されることを確認する
+
+- アップデートする
+```
+# 事前にdeployment.ymlを変更する
+#
+kubectl apply -f deployment.yml --record
+# 状況確認
+kubectl get deployments,replicasets,pods --show-labels
+```
+
 - ロールアウト履歴を確認する
 ```
 kubectl rollout history deployment deploydemo
@@ -145,4 +154,11 @@ kubectl rollout history deployment deploydemo --revision=1
 - ロールバックする
 ```
 kubectl rollout undo deployment deploydemo --to-revision=1
+```
+
+- 後始末
+```
+kubectl delete service deploydemo-lb
+kubectl delete deployment deploydemo
+gcloud container clusters delete deploydemo-cluster --zone=asia-northeast1-a
 ```
