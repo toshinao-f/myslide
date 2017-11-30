@@ -262,7 +262,7 @@ Cloud SQL Proxy経由でCloud SQLに接続するアプリをデプロイする
 ---
 
 ### まとめ・・
-<img src="/assts/architecture.png" width=80%>
+<img src="/assts/architecture.png" width=50%>
 
 ---
 
